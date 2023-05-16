@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">The Wire</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="character_picture">Character Picture</string>
+
+    <string name="character_list_fragment_title">Characters</string>
+    <string name="favorite_or_unfavorite_this_character">Favorite or unfavorite this character</string>
+    <string name="this_character_is_a_favorite">This character is a favorite</string>
+    <string name="character_fave_added">Character Added To Favorites</string>
+    <string name="character_fave_removed">Character Removed From Favorite</string>
+    <string name="character_remove_error">Sorry Couldn\'t Remove Character From Favorites</string>
+    <string name="character_add_error">Sorry Couldn\'t Add Character To Favorites</string>
+    <string name="search_field_empty">Search Field Is Empty</string>
+    <string name="search_for_characters">Search For Characters</string>
+    <string name="search">Search</string>
+    <string name="all_characters">All Characters</string>
+    <string name="favorites">Favorites</string>
+    <string name="character_list_fragment_title_srch">Searching Characters For</string>
+    <string name="character_list_fragment_title_faves">Favorite Characters</string>
+    <string name="character_detail">CharacterDetail</string>
+</resources>
