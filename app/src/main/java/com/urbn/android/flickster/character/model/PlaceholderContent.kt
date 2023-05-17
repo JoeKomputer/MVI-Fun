@@ -1,4 +1,4 @@
-package com.urbn.android.flickster.data
+package com.urbn.android.flickster.character.model
 
 import java.util.ArrayList
 import java.util.HashMap
