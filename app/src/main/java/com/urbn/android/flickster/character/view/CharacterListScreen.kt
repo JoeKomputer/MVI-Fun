@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
@@ -127,23 +128,25 @@ fun CharacterList(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = if(sortOrder == CharacterListVM.ViewState.SortOrder.Ascending){
-                            Icons.Default.KeyboardArrowUp
-                        }else{
-                            Icons.Default.KeyboardArrowDown
-                         },
-                        contentDescription = "",
-                        modifier = Modifier.size(6.dp),
-                        tint = Color.Black
-                    )
-                    Text(
-                        modifier = Modifier,
-                        text = "Sort by name",
-                        style = MaterialTheme.typography.h6,
-                        maxLines = 1,
-                        textAlign = TextAlign.Center
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if(toggleSort){
+                                Icons.Default.KeyboardArrowDown
+                            }else{
+                                Icons.Default.KeyboardArrowUp
+                            },
+                            contentDescription = "",
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Black
+                        )
+                        Text(
+                            modifier = Modifier,
+                            text = "Sort by name",
+                            style = MaterialTheme.typography.h6,
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
             Divider(
