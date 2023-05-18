@@ -10,6 +10,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.urbn.android.flickster.character.view.CharacterDetailScreen
 import com.urbn.android.flickster.character.view.CharacterListScreen
 import com.urbn.android.flickster.character.view.CharacterListVM
 import com.urbn.android.flickster.navigation.Route
@@ -37,5 +38,9 @@ private fun NavGraphBuilder.mainScreenRoute(navController: NavController) {
     composable(Route.CharacterListScreen) {
         val viewModel = hiltViewModel<CharacterListVM>()
         CharacterListScreen(viewModel)
+    }
+    composable(Route.CharacterDetailsScreen) {
+        val viewModel = hiltViewModel<CharacterListVM>()
+        CharacterDetailScreen(viewModel)
     }
 }

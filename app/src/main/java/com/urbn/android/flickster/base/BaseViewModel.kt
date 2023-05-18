@@ -6,6 +6,7 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.urbn.android.flickster.BuildConfig
+import com.urbn.android.flickster.character.view.CharacterListVM
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
@@ -38,6 +39,12 @@ abstract class BaseViewModel<S : UiState, I : UiIntent> : BaseStateIntent<S, I>,
             }
             .getOrThrow()
     }
+
+    /**
+     * Take an intent and convert it to a StateChange
+     * ex: user clicks checkbox (intent) -> submit button becomes valid(changed state)
+     */
+    abstract fun SharedFlow<I>.intentToStatChangeFlow(): Flow<ChangeState<S>>
 
     protected fun <T> SharedFlow<T>.debugLog(subject: String): SharedFlow<T> =
         if (BuildConfig.DEBUG) {

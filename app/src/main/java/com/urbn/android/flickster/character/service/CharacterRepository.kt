@@ -12,14 +12,15 @@ import timber.log.Timber
 import javax.inject.Inject
 
 
+const val IMG_BASE_URL = "https://www.duckduckgo.com"
 interface CharacterRepository {
     fun getCharacters(query : String): Flow<NetworkResult<List<Character>>>
 }
-
 @ActivityRetainedScoped
 class CharacterRepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : CharacterRepository{
+
 
     private sealed class Change {
         class Refreshed(val characters: NetworkResult<List<Character>>) : Change()
@@ -51,7 +52,8 @@ class CharacterRepositoryImpl @Inject constructor(
               Status.SUCCESS ->  NetworkResult.success(it.data?.RelatedTopics?.map {
                     Character(
                         name = it.Text.substringBefore("-"),
-                        details = it.Text.substringAfter("-")
+                        details = it.Text.substringAfter("-"),
+                        imageUrl = IMG_BASE_URL + it.Icon.URL
                     )
                 })
                 Status.ERROR -> NetworkResult.error(

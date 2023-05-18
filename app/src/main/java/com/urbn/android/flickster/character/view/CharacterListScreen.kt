@@ -11,11 +11,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -24,7 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.SubcomposeAsyncImage
 import com.hoc081098.flowext.startWith
+import com.urbn.android.flickster.character.model.Character
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -55,7 +60,8 @@ fun CharacterListScreen(vm : CharacterListVM){
     CharacterListContent(
         viewState = viewState,
         sortCharacters = { dispatch(CharacterListVM.ViewIntent.SortCharacters(it)) },
-        favoriteCharacter = { dispatch(CharacterListVM.ViewIntent.FavoriteCharacter(it)) }
+        favoriteCharacter = { dispatch(CharacterListVM.ViewIntent.FavoriteCharacter(it)) },
+        characterSelected = { dispatch(CharacterListVM.ViewIntent.CharacterSelected(it)) }
     )
 
 }
@@ -63,8 +69,9 @@ fun CharacterListScreen(vm : CharacterListVM){
 @Composable
 fun CharacterListContent(
     viewState: CharacterListVM.ViewState,
-    favoriteCharacter: (com.urbn.android.flickster.character.model.Character) -> Unit,
-    sortCharacters: (CharacterListVM.CharacterListChanges.SortCharacters) -> Unit,
+    favoriteCharacter: (Character) -> Unit,
+    sortCharacters: (CharacterListVM.ViewState.SortOrder) -> Unit,
+    characterSelected: (Character) -> Unit,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -78,39 +85,60 @@ fun CharacterListContent(
 
     CharacterList(
         characters = viewState.characters,
+        sortOrder = viewState.sortedOrder,
         favoriteCharacter = favoriteCharacter,
-        sortCharacters = sortCharacters
+        sortCharacters = sortCharacters,
+        characterSelected = characterSelected
     )
 }
 
 @Composable
 fun CharacterList(
-    characters: ImmutableList<com.urbn.android.flickster.character.model.Character>,
-    sortCharacters: (CharacterListVM.CharacterListChanges.SortCharacters) -> Unit,
-    favoriteCharacter: (com.urbn.android.flickster.character.model.Character) -> Unit,
+    characters: ImmutableList<Character>,
+    sortOrder : CharacterListVM.ViewState.SortOrder,
+    sortCharacters: (CharacterListVM.ViewState.SortOrder) -> Unit,
+    favoriteCharacter: (Character) -> Unit,
+    characterSelected: (Character) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var toggleSort by rememberSaveable{ mutableStateOf(false) }
+    var toggleSort by rememberSaveable{ mutableStateOf(true) }
     LazyColumn {
         item {
             Row(
                 modifier = modifier
                     .clickable {
                         toggleSort = !toggleSort
-                        sortCharacters.invoke(if(toggleSort)CharacterListVM.CharacterListChanges.SortCharacters.Ascending else CharacterListVM.CharacterListChanges.SortCharacters.Descending)
+                        sortCharacters.invoke(
+                            if (toggleSort) {
+                                CharacterListVM.ViewState.SortOrder.Ascending
+                            } else {
+                                CharacterListVM.ViewState.SortOrder.Descending
+                            }
+                        )
                     }
-
-                    .background(MaterialTheme.colors.background)
-                    .padding(all = 4.dp),
+                    .background(MaterialTheme.colors.surface)
+                    .padding(all = 8.dp),
             ) {
                 Column(
                     modifier = Modifier
-                        .align(Alignment.CenterVertically),
+                        .align(Alignment.CenterVertically)
+                        .background(MaterialTheme.colors.surface)
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = CenterHorizontally
                 ) {
+                    Icon(
+                        imageVector = if(sortOrder == CharacterListVM.ViewState.SortOrder.Ascending){
+                            Icons.Default.KeyboardArrowUp
+                        }else{
+                            Icons.Default.KeyboardArrowDown
+                         },
+                        contentDescription = "",
+                        modifier = Modifier.size(6.dp),
+                        tint = Color.Black
+                    )
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier,
                         text = "Sort by name",
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
@@ -118,6 +146,9 @@ fun CharacterList(
                     )
                 }
             }
+            Divider(
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
         }
         itemsIndexed(
             items = characters,
@@ -125,6 +156,7 @@ fun CharacterList(
         ) { index, char ->
             CharacterItemRow(
                 item = char,
+                characterSelected = characterSelected,
                 onFavorite = { favoriteCharacter(char) },
             )
 
@@ -140,10 +172,11 @@ fun CharacterList(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun CharacterItemRow(
-    item: com.urbn.android.flickster.character.model.Character,
+    item: Character,
     onFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     imageSize: Dp = 72.dp,
+    characterSelected: (Character) -> Unit,
     padding: Dp = 8.dp,
     dismissBackgroundColor: Color = MaterialTheme.colors.secondaryVariant,
 ) {
@@ -186,7 +219,7 @@ internal fun CharacterItemRow(
         ) {
             CharacterRowContent(
                 item = item,
-                modifier = modifier,
+                characterSelected = characterSelected,
                 imageSize = imageSize,
                 padding = padding
             )
@@ -195,13 +228,15 @@ internal fun CharacterItemRow(
 
 @Composable
 fun CharacterRowContent(
-    item: com.urbn.android.flickster.character.model.Character,
+    item: Character,
     modifier: Modifier = Modifier,
+    characterSelected: (Character) -> Unit,
     imageSize: Dp = 72.dp,
     padding: Dp = 8.dp){
     Row(
         modifier = modifier
             .background(MaterialTheme.colors.background)
+            .clickable { characterSelected.invoke(item) }
             .padding(all = padding),
     ) {
         CharacterImage(
@@ -240,13 +275,29 @@ fun CharacterRowContent(
 
 @Composable
 private fun CharacterImage(
-    item: com.urbn.android.flickster.character.model.Character,
+    item: Character,
     imageSize: Dp,
     modifier: Modifier = Modifier,
 ) {
+
     Box(modifier = Modifier
-        .size(imageSize)
-        .background(Color.Magenta)) {
-        //TODO ADD IMAGE Loader
+        .size(imageSize)) {
+        SubcomposeAsyncImage(
+            model = item.imageUrl,
+            loading = {
+                CircularProgressIndicator()
+            },
+            contentDescription = "character image of + ${item.name}"
+        )
+        if(item.isFavorite){
+            Box(modifier = Modifier.align(TopStart)){
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "",
+                    modifier = Modifier.size(22.dp),
+                    tint = Color.Blue
+                )
+            }
+        }
     }
 }
