@@ -16,6 +16,6 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context="com.urbn.android.flickster.HostActivity"
+        tools:context="com.joekomputer.android.mvifun.HostActivity"
         tools:listitem="@layout/character_item_content" />
 </androidx.constraintlayout.widget.ConstraintLayout>
