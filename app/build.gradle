@@ -10,7 +10,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.urbn.android.flickster"
+        applicationId "com.joekomputer.android.mvifun"
         minSdk 24
         targetSdk 33
         versionCode 1

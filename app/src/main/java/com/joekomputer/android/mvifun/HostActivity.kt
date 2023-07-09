@@ -11,7 +11,7 @@ class HostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            FlicksterApp()
+            BaseAppComposable()
         }
     }
 }

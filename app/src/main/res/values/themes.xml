@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Flickster" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.MVIPlayground" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/dark_gray</item>
         <item name="colorPrimaryVariant">@color/black</item>
@@ -11,12 +11,12 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.Flickster.NoActionBar">
+    <style name="Theme.MVIPlayground.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.Flickster.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MVIPlayground.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.Flickster.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.MVIPlayground.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

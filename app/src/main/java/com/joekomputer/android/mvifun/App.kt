@@ -14,12 +14,12 @@ import com.joekomputer.android.mvifun.character.view.CharacterDetailScreen
 import com.joekomputer.android.mvifun.character.view.CharacterListScreen
 import com.joekomputer.android.mvifun.character.view.CharacterListVM
 import com.joekomputer.android.mvifun.navigation.Route
-import com.joekomputer.android.mvifun.theme.FlicksterTheme
+import com.joekomputer.android.mvifun.theme.BaseTheme
 
 @Composable
-fun FlicksterApp() {
+fun BaseAppComposable() {
     val navController = rememberNavController()
-    FlicksterTheme {
+    BaseTheme {
         Scaffold(
             content = { padding ->
                 NavHost(

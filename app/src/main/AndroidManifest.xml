@@ -13,8 +13,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name="com.joekomputer.android.mvifun.di.FlicksterApplication"
-        android:theme="@style/Theme.Flickster"
+        android:name="com.joekomputer.android.mvifun.di.BaseApplication"
+        android:theme="@style/Theme.MVIPlayground"
         tools:targetApi="31">
         <activity
             android:name="com.joekomputer.android.mvifun.HostActivity"
