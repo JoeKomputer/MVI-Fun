@@ -29,6 +29,7 @@ class StateMapperTests {
             )
         )
     )
+
     @Test
     fun favoriteCharacterUpdatesState() {
         CharacterListChanges.FavoriteCharacter(
@@ -49,6 +50,65 @@ class StateMapperTests {
                             details = "TEST DET1",
                             imageUrl = "",
                             isFavorite = true
+                        ),
+                        Character(
+                            name = "Test2",
+                            details = "TEST DET1",
+                            imageUrl = ""
+                        ),
+                        Character(
+                            name = "Test3",
+                            details = "TEST DET1",
+                            imageUrl = ""
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun removeFavorite(){
+        val vs = CharacterListVM.ViewState(
+            characters = persistentListOf(
+                Character(
+                    name = "Test1",
+                    details = "TEST DET1",
+                    imageUrl = "",
+                    isFavorite = true
+                ),
+                Character(
+                    name = "Test2",
+                    details = "TEST DET1",
+                    imageUrl = ""
+                ),
+                Character(
+                    name = "Test3",
+                    details = "TEST DET1",
+                    imageUrl = ""
+                )
+            )
+        )
+
+        CharacterListChanges.FavoriteCharacter(
+            character = Character(
+                name = "Test1",
+                details = "TEST DET1",
+                imageUrl = "",
+                isFavorite = true
+            )
+        ).reduce(
+            vs
+        ).run {
+            assertEquals(
+                this,
+                CharacterListVM.ViewState(
+                    characters = persistentListOf(
+                        Character(
+                            name = "Test1",
+                            details = "TEST DET1",
+                            imageUrl = "",
+                            isFavorite = false
                         ),
                         Character(
                             name = "Test2",

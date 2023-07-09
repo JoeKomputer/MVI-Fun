@@ -26,7 +26,7 @@ sealed interface CharacterListChanges : ChangeState<CharacterListVM.ViewState> {
                 characters = viewState.characters.mutate { charList ->
                     charList.forEachIndexed { index, char ->
                         if (char.id == character.id) {
-                            charList[index] = char.copy(isFavorite = true)
+                            charList[index] = char.copy(isFavorite = !char.isFavorite)
                             return@mutate
                         }
                     }
