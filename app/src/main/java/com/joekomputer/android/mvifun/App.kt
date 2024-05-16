@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.joekomputer.android.mvifun.character.view.CharacterDetailScreen
+import com.joekomputer.android.mvifun.character.view.CharacterDetailVM
 import com.joekomputer.android.mvifun.character.view.CharacterListScreen
 import com.joekomputer.android.mvifun.character.view.CharacterListVM
 import com.joekomputer.android.mvifun.navigation.Route
@@ -37,10 +38,10 @@ fun BaseAppComposable() {
 private fun NavGraphBuilder.mainScreenRoute(navController: NavController) {
     composable(Route.CharacterListScreen) {
         val viewModel = hiltViewModel<CharacterListVM>()
-        CharacterListScreen(viewModel)
+        CharacterListScreen(viewModel, navController)
     }
-    composable(Route.CharacterDetailsScreen) {
-        val viewModel = hiltViewModel<CharacterListVM>()
+    composable("${Route.CharacterDetailsScreen}/{characterName}") {
+        val viewModel = hiltViewModel<CharacterDetailVM>()
         CharacterDetailScreen(viewModel)
     }
 }

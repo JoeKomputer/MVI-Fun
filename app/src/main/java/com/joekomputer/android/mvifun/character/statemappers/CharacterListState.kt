@@ -13,16 +13,19 @@ sealed interface CharacterListChanges : ChangeState<CharacterListVM.ViewState> {
                 isLoading = true,
                 error = null
             )
+
             is Data -> viewState.copy(
                 isLoading = false,
                 error = null,
                 characters = characterList.toPersistentList()
             )
+
             is Error -> viewState.copy(
                 isLoading = false,
                 error = error
             )
-            is FavoriteCharacter ->  viewState.copy(
+
+            is FavoriteCharacter -> viewState.copy(
                 characters = viewState.characters.mutate { charList ->
                     charList.forEachIndexed { index, char ->
                         if (char.id == character.id) {
@@ -32,11 +35,13 @@ sealed interface CharacterListChanges : ChangeState<CharacterListVM.ViewState> {
                     }
                 }
             )
+
             is SelectedCharacter -> viewState.copy(selectedCharacter = character)
-            is SortCharacters -> when(this.sortOrder) {
+            is SortCharacters -> when (this.sortOrder) {
                 CharacterListVM.ViewState.SortOrder.Ascending -> viewState.copy(
                     characters = viewState.characters.sortedBy { it.name }.toPersistentList()
                 )
+
                 CharacterListVM.ViewState.SortOrder.Descending -> viewState.copy(
                     characters = viewState.characters.sortedByDescending { it.name }.toPersistentList()
                 )

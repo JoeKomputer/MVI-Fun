@@ -6,16 +6,40 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissValue
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberDismissState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.TopStart
@@ -27,43 +51,37 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.hoc081098.flowext.startWith
 import com.joekomputer.android.mvifun.character.model.Character
+import com.joekomputer.android.mvifun.navigation.Route
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 @Composable
-fun CharacterListScreen(vm : CharacterListVM){
-    val intentChannel = remember { Channel<CharacterListVM.ViewIntent>(Channel.UNLIMITED) }
+fun CharacterListScreen(vm: CharacterListVM, navController: NavController) {
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.Main.immediate) {
-            intentChannel
-                .consumeAsFlow()
+        withContext(Dispatchers.Main) {
+            vm.eventChannel
                 .startWith(CharacterListVM.ViewIntent.Initial)
                 .onEach(vm::processIntent).collect()
         }
     }
 
     val viewState by vm.viewState.collectAsStateWithLifecycle()
-    val dispatch = remember {
-        { intent: CharacterListVM.ViewIntent ->
-            intentChannel.trySend(intent).getOrThrow()
-        }
-    }
 
     CharacterListContent(
         viewState = viewState,
-        sortCharacters = { dispatch(CharacterListVM.ViewIntent.SortCharacters(it)) },
-        favoriteCharacter = { dispatch(CharacterListVM.ViewIntent.FavoriteCharacter(it)) },
-        characterSelected = { dispatch(CharacterListVM.ViewIntent.CharacterSelected(it)) }
+        sortCharacters = { vm.sendIntent(CharacterListVM.ViewIntent.SortCharacters(it)) },
+        favoriteCharacter = { vm.sendIntent(CharacterListVM.ViewIntent.FavoriteCharacter(it)) },
+        characterSelected = {
+            navController.navigate("${Route.CharacterDetailsScreen}/${it.name}")
+        }
     )
-
 }
 
 @Composable
@@ -95,13 +113,13 @@ fun CharacterListContent(
 @Composable
 fun CharacterList(
     characters: ImmutableList<Character>,
-    sortOrder : CharacterListVM.ViewState.SortOrder,
+    sortOrder: CharacterListVM.ViewState.SortOrder,
     sortCharacters: (CharacterListVM.ViewState.SortOrder) -> Unit,
     favoriteCharacter: (Character) -> Unit,
     characterSelected: (Character) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var toggleSort by rememberSaveable{ mutableStateOf(true) }
+    var toggleSort by rememberSaveable { mutableStateOf(true) }
     LazyColumn {
         item {
             Row(
@@ -129,9 +147,9 @@ fun CharacterList(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = if(toggleSort){
+                            imageVector = if (toggleSort) {
                                 Icons.Default.KeyboardArrowDown
-                            }else{
+                            } else {
                                 Icons.Default.KeyboardArrowUp
                             },
                             contentDescription = "",
@@ -191,7 +209,8 @@ internal fun CharacterItemRow(
         }
     )
 
-    SwipeToDismiss(state = favoriteState,
+    SwipeToDismiss(
+        state = favoriteState,
         background = {
             val scale by animateFloatAsState(
                 if (favoriteState.targetValue == DismissValue.Default) {
@@ -218,14 +237,14 @@ internal fun CharacterItemRow(
         },
         directions = setOf(DismissDirection.EndToStart),
         dismissThresholds = { FractionalThreshold(0.25f) },
-        ) {
-            CharacterRowContent(
-                item = item,
-                characterSelected = characterSelected,
-                imageSize = imageSize,
-                padding = padding
-            )
-        }
+    ) {
+        CharacterRowContent(
+            item = item,
+            characterSelected = characterSelected,
+            imageSize = imageSize,
+            padding = padding
+        )
+    }
 }
 
 @Composable
@@ -234,15 +253,16 @@ fun CharacterRowContent(
     modifier: Modifier = Modifier,
     characterSelected: (Character) -> Unit,
     imageSize: Dp = 72.dp,
-    padding: Dp = 8.dp){
+    padding: Dp = 8.dp
+) {
     Row(
         modifier = modifier
             .background(MaterialTheme.colors.background)
             .clickable { characterSelected.invoke(item) }
             .padding(all = padding),
     ) {
-        CharacterImage(
-            item = item,
+        CharacterListImage(
+            character = item,
             imageSize = imageSize,
         )
 
@@ -276,23 +296,25 @@ fun CharacterRowContent(
 }
 
 @Composable
-private fun CharacterImage(
-    item: Character,
-    imageSize: Dp,
+private fun CharacterListImage(
     modifier: Modifier = Modifier,
+    character: Character,
+    imageSize: Dp
 ) {
 
-    Box(modifier = Modifier
-        .size(imageSize)) {
+    Box(
+        modifier = modifier
+            .size(imageSize)
+    ) {
         SubcomposeAsyncImage(
-            model = item.imageUrl,
+            model = character.imageUrl,
             loading = {
                 CircularProgressIndicator()
             },
-            contentDescription = "character image of + ${item.name}"
+            contentDescription = "character image of + ${character.name}"
         )
-        if(item.isFavorite){
-            Box(modifier = Modifier.align(TopStart)){
+        if (character.isFavorite) {
+            Box(modifier = Modifier.align(TopStart)) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "",

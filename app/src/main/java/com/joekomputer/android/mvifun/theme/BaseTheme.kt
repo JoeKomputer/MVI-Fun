@@ -7,7 +7,6 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-
 //<item name="colorPrimary">@color/dark_gray</item>
 //<item name="colorPrimaryVariant">@color/black</item>
 //<item name="colorOnPrimary">@color/white</item>

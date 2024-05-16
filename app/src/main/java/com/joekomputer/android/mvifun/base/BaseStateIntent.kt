@@ -9,5 +9,4 @@ interface BaseStateIntent<S : UiState, I : UiIntent> {
 
     @MainThread
     suspend fun processIntent(intent: I)
-
 }

@@ -7,5 +7,6 @@ import com.joekomputer.android.mvifun.utils.NetworkResult
 import javax.inject.Inject
 
 class GetCharactersUseCase @Inject constructor(private val characterRepository: CharacterRepository) {
-    operator fun invoke(): Flow<NetworkResult<List<Character>>> = characterRepository.getCharacters("the+wire+characters")
+    operator fun invoke(): Flow<NetworkResult<List<Character>>> =
+        characterRepository.getCharacters("the+wire+characters")
 }

@@ -9,7 +9,7 @@ data class Character(
     val details: String,
     val imageUrl: String? = null,
     val isFavorite: Boolean = false
-): Parcelable{
-    val id : String
+) : Parcelable {
+    val id: String
         get() = name + details + imageUrl
 }

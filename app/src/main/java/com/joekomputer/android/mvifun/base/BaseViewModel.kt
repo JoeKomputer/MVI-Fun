@@ -6,30 +6,59 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joekomputer.android.mvifun.BuildConfig
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicInteger
 
-abstract class BaseViewModel<S : UiState, I : UiIntent> : BaseStateIntent<S, I>, ViewModel()  {
+abstract class BaseViewModel<S : UiState, I : UiIntent>(initialVs: S) : BaseStateIntent<S, I>, ViewModel() {
     protected open val rawLogTag: String? = null
 
     private val intentMutableFlow = MutableSharedFlow<I>(extraBufferCapacity = Int.MAX_VALUE)
     protected val intentSharedFlow: SharedFlow<I> get() = intentMutableFlow
+    final override val viewState: StateFlow<S>
 
     @MainThread
     final override suspend fun processIntent(intent: I) {
         check(intentMutableFlow.tryEmit(intent)) { "Failed to emit intent: $intent" }
         Timber.tag(logTag).d("processIntent: $intent")
     }
-    private val eventChannel = Channel<I>(Channel.UNLIMITED)
 
-    final val singleIntent: Flow<I> = eventChannel.receiveAsFlow()
+    private val _eventChannel = Channel<I>(Channel.UNLIMITED)
 
-    protected suspend fun sendIntent(intent: I) {
-        eventChannel.trySend(intent)
+    val eventChannel: Flow<I> by lazy { _eventChannel.receiveAsFlow() }
+
+    val singleIntent: Flow<I> = _eventChannel.receiveAsFlow()
+
+    init {
+        viewState = intentSharedFlow
+            .shareWhileSubscribed()
+            .callIntentToStateChangeFlow()
+            .debugLog("StateChange")
+            .scan(initialVs) { vs, change ->
+                change.reduce(vs)
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.Eagerly,
+                initialVs
+            )
+    }
+
+    fun sendIntent(intent: I) {
+        _eventChannel.trySend(intent)
             .onSuccess { Timber.tag(logTag).d("sendIntent: event=$intent") }
             .onFailure {
                 Timber
@@ -45,6 +74,7 @@ abstract class BaseViewModel<S : UiState, I : UiIntent> : BaseStateIntent<S, I>,
      */
     abstract fun SharedFlow<I>.intentToStatChangeFlow(): Flow<ChangeState<S>>
 
+    private final fun SharedFlow<I>.callIntentToStateChangeFlow(): Flow<ChangeState<S>> = intentToStatChangeFlow()
     protected fun <T> SharedFlow<T>.debugLog(subject: String): SharedFlow<T> =
         if (BuildConfig.DEBUG) {
             val self = this
@@ -95,6 +125,5 @@ abstract class BaseViewModel<S : UiState, I : UiIntent> : BaseStateIntent<S, I>,
     private companion object {
         private const val MAX_TAG_LENGTH = 23
     }
-
 }
 

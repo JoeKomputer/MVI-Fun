@@ -7,5 +7,8 @@ import retrofit2.http.Query
 
 interface ApiService {
     @GET(".")
-    suspend fun getCharacters(@Query("q", encoded = true) query : String, @Query("format") format : String = "json"): Response<WireApiResponse>
+    suspend fun getCharacters(
+        @Query("q", encoded = true) query: String,
+        @Query("format") format: String = "json"
+    ): Response<WireApiResponse>
 }
