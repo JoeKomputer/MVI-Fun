@@ -1,6 +1,6 @@
 ## MVI/Jetpack Compose Playground
 
-For fun minimalistic implementation of MVI using Jetpack Compose views instead of Fragments.
+For fun minimalistic implementation of MVI using Jetpack Compose views within an Android Activity.
 
 ## Project uses
 * Jetpack Compose
